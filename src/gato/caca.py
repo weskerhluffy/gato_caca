@@ -101,19 +101,20 @@ def determina_siguiente_movimiento(gato, jugador, jugador_actual, movimientos_cn
     puntaje_actual = 0
     movimientos_cnt_final = movimientos_cnt
     jugador_anterior = determina_jugador_opuesto(jugador_actual)
-    logger_cagada.debug("en gato\n{}".format(caca_comun_imprime_matrix(gato)))
+#    logger_cagada.debug("en gato\n{}".format(caca_comun_imprime_matrix(gato)))
     
     if posicion_anterior:
         puntaje_anterior = determina_valor(gato, jugador_anterior, posicion_anterior)
         if jugador != jugador_anterior:
             puntaje_anterior *= -1
+            
+    gato_tmp = deepcopy(gato)
+    if posicion_anterior:
+        gato_tmp[posicion_anterior[0]][posicion_anterior[1]] = jugador_anterior
     
     if not posicion_anterior or not es_hoja(movimientos_cnt, gato, jugador_anterior, posicion_anterior):
-        gato_tmp = deepcopy(gato)
-        if posicion_anterior:
-            gato_tmp[posicion_anterior[0]][posicion_anterior[1]] = jugador_anterior
         
-        logger_cagada.debug("gato orig \n{}\nact\n{} valor {}".format(caca_comun_imprime_matrix(gato), caca_comun_imprime_matrix(gato_tmp), puntaje_anterior))
+#        logger_cagada.debug("gato orig \n{}\nact\n{} valor {}".format(caca_comun_imprime_matrix(gato), caca_comun_imprime_matrix(gato_tmp), puntaje_anterior))
         
         libres = determina_posiciones_libres(gato_tmp)
     
@@ -129,14 +130,22 @@ def determina_siguiente_movimiento(gato, jugador, jugador_actual, movimientos_cn
                 mejor_pos = libre
                 movimientos_cnt_final = movimientos_cnt_tmp
     else:
-        gato_tmp = deepcopy(gato)
-        gato_tmp[posicion_anterior[0]][posicion_anterior[1]] = jugador_anterior
         if es_movimiento_bloqueador(gato, jugador, posicion_anterior):
-            logger_cagada.debug("se blokea con\n{}".format(caca_comun_imprime_matrix(gato_tmp)))
+            pass
+#            logger_cagada.debug("se blokea con\n{}".format(caca_comun_imprime_matrix(gato_tmp)))
         if es_movimiento_ganador(gato, jugador, posicion_anterior):
-            logger_cagada.debug("se gana con\n{}".format(caca_comun_imprime_matrix(gato_tmp)))
+            pass
+#           logger_cagada.debug("se gana con\n{}".format(caca_comun_imprime_matrix(gato_tmp)))
         if not movimientos_cnt:
-            logger_cagada.debug("no hay mas con\n{}".format(caca_comun_imprime_matrix(gato_tmp)))
+            pass
+#          logger_cagada.debug("no hay mas con\n{}".format(caca_comun_imprime_matrix(gato_tmp)))
+    gato_tmp_1 = deepcopy(gato)
+    if posicion_anterior:
+        gato_tmp_1[posicion_anterior[0]][posicion_anterior[1]] = jugador_anterior
+    gato_tmp_2 = deepcopy(gato_tmp)
+    if mejor_pos:
+        gato_tmp_2[mejor_pos[0]][mejor_pos[1]] = jugador_actual
+    logger_cagada.debug("el mejor tiro para estado\n{} jugador {} es\n{} con putaje {}".format(caca_comun_imprime_matrix(gato_tmp_1), jugador_actual, caca_comun_imprime_matrix(gato_tmp_2), puntaje_actual))   
     return puntaje_anterior + puntaje_actual, movimientos_cnt_final, mejor_pos
 
 def core(gato, jugador):
