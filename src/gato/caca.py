@@ -11,6 +11,7 @@ from sys import stdin
 from collections import Counter
 from operator import gt, lt
 from copy import copy, deepcopy
+from numpy import matrix
 
 nivel_log = logging.ERROR
 nivel_log = logging.DEBUG
@@ -31,10 +32,13 @@ def determina_posicion_en_diagonal_asc(gato, posicion):
 def determina_posicion_en_diagonal_desc(gato, posicion):
     return posicion[0] == posicion[1]
 
+matrix_valores_linea = None
+
 def determina_valor_por_lineas(gato, jugador, posicion):
     pos_i = posicion[0]
     pos_j = posicion[1]
     gato_len = len(gato)
+    jugador_opuesto = determina_jugador_opuesto(jugador)
     r = 0
     
     lineas = []
@@ -48,24 +52,14 @@ def determina_valor_por_lineas(gato, jugador, posicion):
     if determina_posicion_en_diagonal_desc(gato, posicion):
         lineas.append(gato[i][i] for i in range(gato_len))
     
-    lineas_gane = list(filter(lambda linea:Counter(linea)[jugador] == 2, lineas))
-    lineas_bloqueo = list(filter(lambda linea:Counter(linea)[determina_jugador_opuesto(jugador)] == 2, lineas))
-    lineas_parciales = list(filter(lambda linea:Counter(linea)[jugador] == 1 and Counter(linea)[vacio] == 2, lineas))
+    for linea in lineas:
+        cnt = Counter(linea)
+        rt = matrix_valores_linea[cnt[jugador]][cnt[jugador_opuesto]][cnt[vacio]]
+        if rt > r:
+            rt = r
+        if r == 5:
+            break
     
-#    logger_cagada.debug("lineas gane {}".format(lineas_gane))
-#    logger_cagada.debug("lineas blokeo {}".format(lineas_bloqueo))
-#    logger_cagada.debug("lineas parciales {}".format(lineas_parciales))
-    
-    if lineas_parciales:
-        r = 3
-    if lineas_gane:
-        r = 4
-    if lineas_bloqueo:
-        r = 5
-    
-    gato_tmp = deepcopy(gato)
-    gato_tmp[posicion[0]][posicion[1]] = jugador
-#    logger_cagada.debug("el valor de \n{} es {}".format(caca_comun_imprime_matrix(gato_tmp), r))
     return r
 
 def determina_valor_posicion(posicion):
@@ -171,7 +165,17 @@ def main():
 def llena_esquinas(gato):
     gato_len = len(gato)
     global esquinas
+    global matrix_valores_linea
     esquinas = set([(0, 0), (0, gato_len - 1), (gato_len - 1, 0), (gato_len - 1, gato_len - 1)])
+    matrix_valores_linea = []
+    for _ in range(4):
+        m = []
+        for _ in range(4):
+            m.append([0] * 4)
+        matrix_valores_linea.append(m)
+    matrix_valores_linea[1][0][2] = 3
+    matrix_valores_linea[2][0][1] = 4
+    matrix_valores_linea[0][2][1] = 5
 
 if __name__ == '__main__':
         FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
